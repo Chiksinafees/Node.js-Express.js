@@ -6,6 +6,8 @@ const bodyParser = require("body-parser");
 const errorController = require("./controllers/error");
 const deleteController = require("./controllers/delete");
 
+const sequelize = require("./util/dataBase");
+
 const app = express();
 
 app.set("view engine", "ejs");
@@ -22,4 +24,10 @@ app.use(shopRoutes);
 app.use(deleteController.delete);
 app.use(errorController.get404);
 
-app.listen(3000);
+sequelize
+  .sync()
+  .then((res) => {
+    console.log(res);
+    app.listen(3000);
+  })
+  .catch((err) => console.log(err));

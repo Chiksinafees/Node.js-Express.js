@@ -1,50 +1,28 @@
-const db = require("../util/dataBase");
+const Sequalize = require("sequelize");
 
-const Cart = require("./cart");
+const sequelize = require("../util/dataBase"); //database connection pool / fully configured sequalized environment+ all feature of sequalized package
 
-module.exports = class Product {
-  constructor(id, title, imageUrl, price, description) {
-    this.id = id;
-    this.title = title;
-    this.imageUrl = imageUrl;
-    this.price = price;
-    this.description = description;
-  }
+const Product = sequelize.define("product", {
+  id: {
+    type: Sequalize.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true,
+  },
+  title: Sequalize.STRING,
+  imageUrl: {
+    type: Sequalize.STRING,
+    allowNull: false,
+  },
+  price: {
+    type: Sequalize.DOUBLE,
+    allowNull: false,
+  },
 
-  save() {
-    return db.execute(
-      "INSERT INTO products(title,imageUrl, price, description) VALUES(?,?,?,?)",
-      [this.title, this.imageUrl, this.price, this.description]
-    );
-  }
+  description: {
+    type: Sequalize.STRING,
+    allowNull: false,
+  },
+});
 
-  edit(id) {
-    console.log(
-      "Values to be updated:",
-      this.title,
-      this.imageUrl,
-      this.price,
-      this.description,
-      id
-    );
-
-    return db.execute(
-      `UPDATE products 
-         SET title = ?, imageUrl = ?, price = ?, description = ? 
-         WHERE id = ?`,
-      [this.title, this.imageUrl, this.price, this.description, id]
-    );
-  }
-
-  static deleteProductById(id) {
-    return db.execute("DELETE FROM products WHERE products.id=?", [id]);
-  }
-
-  static fetchAll() {
-    return db.execute("SELECT * FROM products");
-  }
-
-  static findById(id) {
-    return db.execute("SELECT * FROM products WHERE products.id=?", [id]);
-  }
-};
+module.exports = Product;
