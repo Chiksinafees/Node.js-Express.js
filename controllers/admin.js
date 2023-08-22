@@ -13,12 +13,16 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  Product.create({
-    title: title,
-    imageUrl: imageUrl,
-    price: price,
-    description: description,
-  })
+
+  req.user
+    .createProduct({
+      // MAGIC WAY of CONNECTING, Product is our model and sequalize add create on it
+      title: title,
+      imageUrl: imageUrl,
+      price: price,
+      description: description,
+      // userdatumId: req.user.id
+    })
     .then((result) => {
       // console.log(res);
       res.redirect("/admin/products");
@@ -27,7 +31,8 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll()
+  req.user
+    .getProducts()
     .then((product) => {
       res.render("admin/products", {
         prods: product,
@@ -40,16 +45,15 @@ exports.getProducts = (req, res, next) => {
 
 exports.getEditProduct = (req, res, next) => {
   let editMode = req.query.edit;
-  // console.log('edit', editMode)
   if (!editMode) {
     return res.redirect("/");
   }
   const prodId = req.params.productId;
-  // console.log('prodId', prodId)
+  req.user
+    .getProducts({ where: { id: prodId } }) //  getProducts always give data inside array, no matter it contain only one data
+    .then((products) => {
+      const product = products[0];
 
-  Product.findByPk(prodId)
-    .then((product) => {
-      console.log("qqqqqq", product);
       if (!product) {
         return res.redirect("/");
       }
