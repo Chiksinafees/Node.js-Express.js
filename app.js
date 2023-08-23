@@ -9,6 +9,8 @@ const deleteController = require("./controllers/delete");
 const sequalize = require("./util/dataBase");
 const Product = require("./models/product");
 const UserData = require("./models/userData");
+const Cart = require("./models/cart");
+const CartItem = require("./models/cart-items");
 
 const app = express();
 
@@ -40,12 +42,15 @@ app.use(errorController.get404);
 Product.belongsTo(UserData, { constraints: true, onDelete: "CASCADE" }); // onDelete= cascade means if userdata is deleted then all data associated with it also get deleted
 UserData.hasMany(Product);
 // constraints:true means create a relation between product and userdata
+UserData.hasOne(Cart);
+Cart.belongsTo(UserData);
+Cart.belongsToMany(Product, { through: CartItem }); // telling sequelize where these connection store
+Product.belongsToMany(Cart, { through: CartItem });
 
 sequalize
   // .sync({force:true})  // force:true means to override existing table with new changes
   .sync()
   .then((result) => {
-    // console.log(UserData.findByPk(1));
     return UserData.findByPk(1);
   })
   .then((user) => {
@@ -54,8 +59,11 @@ sequalize
     }
     return user;
   })
-  .then((result) => {
-    console.log(result);
+  .then((user) => {
+    return user.createCart();
+  })
+  .then((cart) => {
+    console.log(cart);
     app.listen(3000);
   })
   .catch((err) => console.log(err));
